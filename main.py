@@ -12,7 +12,7 @@ from datacenter.models import (
 )
 
 
-comms_text = [
+commendations = [
     'Молодец!', 'Отлично!', 'Хорошо!', 'Гораздо лучше, чем я ожидал!', 'Ты меня приятно удивил!',
     'Великолепно!', 'Прекрасно!', 'Ты меня очень обрадовал!', 'Именно этого я давно ждал от тебя!',
     'Сказано здорово – просто и ясно!', 'Ты, как всегда, точен!', 'Очень хороший ответ!', 'Талантливо!',
@@ -73,7 +73,7 @@ def main():
         print(f'Исправлено оценок - {fix_marks(schoolkid)}')
         print(f'Удалено замечаний - {remove_chastisements(schoolkid)}')
         subject = Subject.objects.get(title=subject, year_of_study=year_of_study)
-        commmendation = create_commendation(schoolkid, subject, random.choice(comms_text))
+        commmendation = create_commendation(schoolkid, subject, random.choice(commendations))
         print(
             f'Лайк "{commmendation.text}" от'
             f' {commmendation.teacher} по'
