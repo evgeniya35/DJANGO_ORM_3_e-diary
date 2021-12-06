@@ -27,7 +27,7 @@ commendations = [
 def fix_marks(schoolkid):
     '''исправляет все оценки ниже 4 на 5'''
     marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4).all()
-    if not marks.count(): return 0
+    if not marks: return 0
     for mark in marks:
         mark.points = 5
         mark.save()
