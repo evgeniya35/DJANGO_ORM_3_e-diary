@@ -1,8 +1,10 @@
 import argparse
+from math import e
 import os
 import random
 
 import django
+from django.core.exceptions import MultipleObjectsReturned
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
@@ -25,7 +27,6 @@ commendations = [
 
 
 def fix_marks(schoolkid):
-    '''исправляет все оценки ниже 4 на 5'''
     marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4).all()
     if not marks: return 0
     for mark in marks:
@@ -35,17 +36,18 @@ def fix_marks(schoolkid):
 
 
 def remove_chastisements(schoolkid):
-    '''удаляет все замечания ученика'''
     chastisements = Chastisement.objects.filter(schoolkid=schoolkid).all()
     return chastisements.delete()[0]
 
 
 def create_commendation(schoolkid, subject, text):
-    lesson = Lesson.objects.filter(
+    lessons = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
         group_letter=schoolkid.group_letter,
         subject=subject
-        ).order_by('?').first()
+        ).order_by('?')
+    if not lessons: raise Lesson.DoesNotExist
+    lesson = lessons.first()
     commendation = Commendation.objects.create(
         text=text,
         created=lesson.date,
@@ -75,16 +77,18 @@ def main():
         subject = Subject.objects.get(title=subject, year_of_study=year_of_study)
         commmendation = create_commendation(schoolkid, subject, random.choice(commendations))
         print(
-            f'Лайк "{commmendation.text}" от'
+            f'Лайк {commmendation.text} от'
             f' {commmendation.teacher} по'
             f' {commmendation.subject}'
             )
     except Schoolkid.DoesNotExist:
-        print(f'Не нашёл ученика "{surname}" в классе "{year_of_study}{group_letter}"')
+        print(f'Не нашёл ученика {surname} в классе {year_of_study}{group_letter}')
     except Schoolkid.MultipleObjectsReturned:
-        print(f'Несколько учеников "{surname}" в классе "{year_of_study}{group_letter}"')
+        print(f'Несколько учеников {surname} в классе {year_of_study}{group_letter}')
     except Subject.DoesNotExist:
-        print(f'Предмет  "{subject}" в классе "{year_of_study}" не найден')
+        print(f'Предмет  {subject} в классе {year_of_study} не найден')
+    except Lesson.DoesNotExist:
+        print('Урок не найден')
 
 
 if __name__ == '__main__':
